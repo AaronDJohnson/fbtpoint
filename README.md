@@ -1,7 +1,11 @@
 # fbtpoint
  Frequency based, hypergeometric Teukolsky solving code for black hole perturbation theory
 
- ## Currently this does equatorial orbits, but it will be generalized soon
+ ## Currently this does equatorial orbits, but it will be generalized
+
+ ## This work makes use of the black hole perturbation toolkit
+
+ * bhptoolkit.org
 
  This code is a work in progress. Currently, the geodesic and renormnu functions run well and have been tested on some data. I plan to add many more test functions with current data from the literature.
 
