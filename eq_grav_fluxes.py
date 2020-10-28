@@ -70,7 +70,6 @@ def mode_search(slr, ecc, aa, ellmax, kaymax, ess=-2, verbose=True):
 
 
 if __name__ == "__main__":
-    mp.dps = 50
     slr = 7
     ecc = 0.1
     aa = 0.998

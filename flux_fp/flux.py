@@ -1,4 +1,9 @@
-from geodesic_fp.coords import calc_equatorial_coords
+import os, sys, inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+
+from geodesic_fp.coords import py_calc_equatorial_coords
 from source_fp.tsource import eq_source
 from teukolsky_fp.homteuk import py_find_R
 
@@ -27,7 +32,7 @@ def eq_find_z(nu, Bin, eigen, slr, ecc, aa, ups_r, ups_theta, ups_phi, gamma,
     # print(type(zp))
 
     def find_psi_integrand(psi):
-        t, r, __, phi = calc_equatorial_coords(psi, ups_r, ups_theta,
+        t, r, __, phi = py_calc_equatorial_coords(psi, ups_r, ups_theta,
                                                   ups_phi, gamma, r1,
                                                   r2, r3, r4, zp, zm, En, Lz,
                                                   aa, slr, ecc)
@@ -53,7 +58,7 @@ def eq_find_z(nu, Bin, eigen, slr, ecc, aa, ups_r, ups_theta, ups_phi, gamma,
         psi = coeff * np.log(1 + zeta / coeff)
         dchi_dzeta = np.exp(-psi / coeff)
 
-        t, r, __, phi = calc_equatorial_coords(psi, ups_r, ups_theta,
+        t, r, __, phi = py_calc_equatorial_coords(psi, ups_r, ups_theta,
                                                   ups_phi, gamma, r1,
                                                   r2, r3, r4, zp, zm, En, Lz,
                                                   aa, slr, ecc)
