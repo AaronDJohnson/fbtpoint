@@ -124,9 +124,13 @@ def solve_sparse_matrix(c, ell, em, ess=-2):
     # print(eigenvectors.T)
     xmin = min(np.real(eigenvalues)) - ess * (ess + 1)
     eigen = xmin + c * c - 2 * c * em
-    # if max(np.real(eigenvectors) < 0):
-    #     eigenvectors = eigenvectors * -1
+    # ind_max = np.argmax(np.abs(np.real(eigenvectors)))
+    # print(ind_max)
+    if eigenvectors[0] < 0:  # largest value is always [0]
+        # print('mult by -1')
+        eigenvectors = eigenvectors * -1
     coeffs = eigenvectors.T[0]
+    # print(coeffs)
     # coeffs = np.where(abs(eigenvectors.T[0])>1e-16, eigenvectors.T[0], 0)
     # print(eigenvalues)
     # print(eigenvectors.T)
