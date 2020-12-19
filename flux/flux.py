@@ -3,15 +3,17 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
-from geodesic_fp.coords import py_calc_equatorial_coords
-from source_fp.tsource import eq_source
-from teukolsky_fp.homteuk import py_find_R
+from geodesic.coords import py_calc_equatorial_coords
+from source.tsource import eq_source
+from teukolsky.homteuk import py_find_R
 
 from scipy.integrate import romberg, quad
 
 import numpy as np
 
 from mpmath import mp
+
+# TODO (aaron): set up special case of circular orbits (no integral in this case)
 
 
 def eq_find_z(nu, Bin, eigen, slr, ecc, aa, ups_r, ups_theta, ups_phi, gamma,
@@ -51,7 +53,7 @@ def eq_find_z(nu, Bin, eigen, slr, ecc, aa, ups_r, ups_theta, ups_phi, gamma,
         )
         return result
 
-    coeff = abs(find_psi_integrand(0)) / abs(find_psi_integrand(np.pi))
+    # coeff = abs(find_psi_integrand(0)) / abs(find_psi_integrand(np.pi))
     # print(coeff)
 
     def integrand(zeta):
@@ -85,16 +87,29 @@ def eq_find_z(nu, Bin, eigen, slr, ecc, aa, ups_r, ups_theta, ups_phi, gamma,
     def integrand_im(zeta):
         return np.imag(integrand(zeta))
 
-    a = 0
+    def cheap_re(zeta):
+        return np.real(find_psi_integrand(zeta))
+
+    def cheap_im(zeta):
+        return np.imag(find_psi_integrand(zeta))
+
+    # a = 0
     # mp.dps += 50
     # TODO: fix overflow in the following line
-    b = float((mp.exp(np.pi / coeff) - 1) * coeff)
+    # b = float((np.exp(np.pi / coeff) - 1) * coeff)
+    # print(b)
     # print("b = ", b)
-    # re_res = np.real(quad(integrand_re, a, b))
-    # im_res = np.real(quad(integrand_im, a, b))
+    # re_res, re_err = quad(integrand_re, a, b)
+    # im_res, im_err = quad(integrand_im, a, b)
 
-    re_res = romberg(integrand_re, a, b, divmax=20)
-    im_res = romberg(integrand_im, a, b, divmax=20)
+    re_res, re_err = quad(cheap_re, 0, np.pi)
+    im_res, im_err = quad(cheap_im, 0, np.pi)
+
+    print(re_err)
+    print(im_err)
+
+    # re_res = romberg(integrand_re, a, b, divmax=20)
+    # im_res = romberg(integrand_im, a, b, divmax=20)
 
     Z = omega_r / (2 * 1j * omega * Bin) * (re_res + 1j * im_res)
     return Z

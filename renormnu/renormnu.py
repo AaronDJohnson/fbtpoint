@@ -151,7 +151,7 @@ def find_nu(aa, omega, eigen, ell, em, ess=-2, tol=10**(-mp.dps)):
         if nmax >= 600:
             print("nu failed to converge.")
             return 0
-    return nu
+    return re(nu), im(nu)
 
 
 

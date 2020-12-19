@@ -37,7 +37,8 @@ def calc_nu(aa, slr, ecc, x, ell, en, em, kay, digits=100, ess=-2, M=1):
     omega = en * omega_r + em * omega_phi + kay * omega_theta
     c, km, kp, nInv = swsh_constants(aa, omega, ell, em, ess)
     __, eigen = swsh_eigen(c, km, kp, ell, em, nInv, ess)
-    return float(find_nu(aa, omega, eigen, ell, em))
+    re_nu, im_nu = find_nu(aa, omega, eigen, ell, em)
+    return float(re_nu), float(im_nu)
 
 
     

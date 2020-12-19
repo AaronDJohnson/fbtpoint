@@ -5,17 +5,17 @@ from mpmath import mpf, mp
 
 import numpy as np
 
-from geodesic_fp.constants import fp_calc_constants
-from geodesic_fp.frequencies import fp_radial_roots, fp_polar_roots, fp_boyer_freqs
-from geodesic_fp.frequencies import fp_mino_freqs, fp_find_omega
+from geodesic.constants import fp_calc_constants
+from geodesic.frequencies import fp_radial_roots, fp_polar_roots, fp_boyer_freqs
+from geodesic.frequencies import fp_mino_freqs, fp_find_omega
 
-from swsh_fp.swsh import calc_swsh_eq
+from swsh.swsh import calc_swsh_eq
 # from swsh.accurate.leaver import swsh_eigen, swsh_constants
 
-from renormnu_hp.functions import calc_nu
-from teukolsky_fp.homteuk import py_find_Bin
+from renormnu.functions import calc_nu
+from teukolsky.homteuk import py_find_Bin
 
-from flux_fp.flux import flux_inf
+from flux.flux import flux_inf
 from data import make_folder, save_data, save_wave_data
 
 
@@ -44,12 +44,13 @@ def equatorial_fluxes(slr, ecc, aa, x, ell, em, kay, ess=-2, verbose=True):
                                                      gamma, aa, slr, ecc, x)
 
     omega = fp_find_omega(omega_r, omega_theta, omega_phi, em, 0, kay)
-    nu = calc_nu(aa, slr, ecc, x, ell, kay, em, 0)
+    re_nu, im_nu = calc_nu(aa, slr, ecc, x, ell, kay, em, 0)
 
     eigen, Slm, Slmd, Slmdd = calc_swsh_eq(aa, omega, ell, em, ess)
 
-    re_nu = np.real(nu)
-    im_nu = np.imag(nu)
+    # re_nu = np.real(nu)
+    # im_nu = np.imag(nu)
+    nu = re_nu + 1j * im_nu
     Bin = py_find_Bin(re_nu, im_nu, eigen, aa, omega, em)
 
     energy_inf, Z = flux_inf(nu, Bin, eigen, slr, ecc, aa, ups_r, ups_theta,
@@ -70,13 +71,15 @@ def mode_search(slr, ecc, aa, ellmax, kaymax, ess=-2, verbose=True):
 
 
 if __name__ == "__main__":
+    aa = 0.99
     slr = 7
-    ecc = 0.1
-    aa = 0.998
-    ell = 2
-    em = 2
-    kay = 0
+    ecc = 0.3
     x = 1
+
+    kay = 0
+    em = 2
+    ell = 2
+    en = 0
 
     # mode_search(slr, ecc, aa, 2, 5)
     equatorial_fluxes(slr, ecc, aa, x, ell, em, kay, verbose=True)
