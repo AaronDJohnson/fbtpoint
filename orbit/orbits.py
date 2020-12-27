@@ -236,19 +236,27 @@ class Orbit:
     #     """
     #     self.mode_content
 
-    def geodesic_eq(self, num_pts=10000):
-        self.psi = np.linspace(0, 2*np.pi, num=num_pts)  # Ups_r * lambda
+
+    def geodesic_eq(self, num_pts=10000, end=2*np.pi):
+        self.psi = np.linspace(0, end, num=num_pts)
         self.geodesic_array = np.zeros((len(self.psi), 4))
         for i in range(len(self.psi)):
             self.zeta = self.psi[i]
             self.t, self.r, self.theta, self.phi = py_calc_equatorial_coords(self.zeta, self.ups_r, self.ups_theta,
-                                                                            self.ups_phi, self.gamma, self.r1,
-                                                                            self.r2, self.r3,
-                                                                            self.r4, self.zp, self.zm, self.En,
-                                                                            self.Lz, self.aa, self.slr, self.ecc)
+                                                                             self.ups_phi, self.gamma, self.r1,
+                                                                             self.r2, self.r3,
+                                                                             self.r4, self.zp, self.zm, self.En,
+                                                                             self.Lz, self.aa, self.slr, self.ecc)
             self.geodesic_array[i,:] = self.t, self.r, self.theta, self.phi
         return self.geodesic_array
 
+    def geodesic_psi(self, psi):
+        self.t, self.r, self.theta, self.phi = py_calc_equatorial_coords(psi, self.ups_r, self.ups_theta,
+                                                                             self.ups_phi, self.gamma, self.r1,
+                                                                             self.r2, self.r3,
+                                                                             self.r4, self.zp, self.zm, self.En,
+                                                                             self.Lz, self.aa, self.slr, self.ecc)
+        return self.t, self.r, self.theta, self.phi
 
 
 
