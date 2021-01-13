@@ -109,7 +109,7 @@ complex<double> hypgeo_2f1(complex<double> a, complex<double> b,
 
 
 	acb_t arb_input_a, arb_input_b, arb_input_c, arb_input_z, arb_result;
-	slong prec = 55;
+	slong prec = 300;
 
 	acb_init(arb_input_a);
 	acb_init(arb_input_b);

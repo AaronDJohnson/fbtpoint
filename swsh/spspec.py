@@ -5,51 +5,84 @@ from scipy.special import comb, factorial
 
 #-------------------------------------------------------------------------------
 # create and solve the spectral method matrix to get eigenvalues and coeffs
-# for Ylms
+# for Ylms to evaluate the spin-weighted spheroidal harmonics
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 # TODO List:
 #
-# * make sure that the spectral matrix is symmetric for every situation
-# * solve only for the necessary eigenvalue (closest to A0) and its vector
-# * port everything to C++ to make this fast and arbitrary precision
-#    - this should use Eigen and GMP
-# * check that the solution is correct for different cases
-# * figure out what to do in the SC case (this should be easy)
-#    - the relevant case is a = 0 => a * omega = 0
-#    - this will reduce down to sYlm and A0
-# * think about whether nmax is large enough (incorrect if not!)
+# * make sure that the spectral matrix is symmetric for every situationr
+# * add test cases and check accuracy with BHPTK
+#
 #-------------------------------------------------------------------------------
 
 
 def swsh_constants(aa, omega, ell, em, ess=-2):
+    """
+    Compute needed constants to compute spin-weighted spheroidal harmonics.
+
+    Inputs:
+        aa (float): MBH spin parameter
+        omega (float): gravitational wave frequency
+        ell (int): swsh mode number
+        em (int): mode number
+        ess (int) [-2]: spin number
+
+    Returns:
+        c (float): a * omega
+        km (float): abs(em - ess)
+        kp (float): abs(em + ess)
+    """
     km = abs(em - ess)
     kp = abs(em + ess)
     c = aa * omega
     if em == 1:
-        ell = ell - 1
+        ell = ell - 1  # why is this necessary?? TODO (aaron): figure it out
     return c, km, kp
 
 
 def kHat(c, ell, em, ess=-2):
+    """
+    Compute diagonal elements of sparse matrix to be solved.
+
+    Inputs:
+        c (float): a * omega
+        ell (int): swsh mode number
+        em (int): mode number
+        ess (int) [-2]: spin number
+
+    Returns:
+        kHat (float): diagonal element
+    """
     # print(ell)
     # print(np.where(ell == 0)[0])
-    # if ell == 0 and em == 0:
-    #     return pow(c, 2 / 3)
-    # else:
-    ell2 = ell * ell
-    em2 = em * em
-    ell3 = ell2 * ell
-    ess2 = ess * ess
-    c2 = c * c
+    if ell == 0 and em == 0:
+        return c ** 2 / 3
+    else:
+        ell2 = ell * ell
+        em2 = em * em
+        ell3 = ell2 * ell
+        ess2 = ess * ess
+        c2 = c * c
 
-    return (-(ell*(1 + ell)) + (2*em*ess2*c)/(ell + ell2) + 
-             ((1 + (2*(ell + ell2 - 3*em2)*(ell + ell2 - 3*ess2))/
-             (ell*(-3 + ell + 8*ell2 + 4*ell3)))*c2)/3.)
+        return (-(ell*(1 + ell)) + (2*em*ess2*c)/(ell + ell2) + 
+                ((1 + (2*(ell + ell2 - 3*em2)*(ell + ell2 - 3*ess2))/
+                (ell*(-3 + ell + 8*ell2 + 4*ell3)))*c2)/3.)
 
 
 def k2(c, ell, em, ess=-2):
+    """
+    Compute off (diagonal +/- 2) elements of sparse matrix to be solved.
+
+    Inputs:
+        c (float): a * omega
+        ell (int): swsh mode number
+        em (int): mode number
+        ess (int) [-2]: spin number
+
+    Returns:
+        k2 (float): off diagonal +/- 2 elements
+    """
     c2 = c * c
     ellmem = ell - em
     ellpem = ell + em
@@ -75,20 +108,41 @@ def k2(c, ell, em, ess=-2):
 
 
 def kTilde2(c, ell, em, ess=-2):
+    """
+    Compute off (diagonal +/- 1) elements of sparse matrix to be solved.
+
+    Inputs:
+        c (float): a * omega
+        ell (int): swsh mode number
+        em (int): mode number
+        ess (int) [-2]: spin number
+
+    Returns:
+        kTilde2 (float): off diagonal +/- 1 element
+    """
     ess2 = ess * ess
-    # if (ell == 0 and em == 0):
-    #     return (-2*c*ess*np.sqrt(1 - ess2))/np.sqrt(3)
-    # else:
-    ell2 = ell * ell
-    em2 = em * em
-    return ((-2*c*(2*ell + ell2 + c*em)*ess*
-            np.sqrt(((1 + 2*ell + ell2 - em2)*(1 + 2*ell + ell2 - ess2))/
-            (3 + 8*ell + 4*ell2)))/(ell*(2 + 3*ell + ell2)))
+    if (ell == 0 and em == 0):
+        return (-2*c*ess*np.sqrt(1 - ess2))/np.sqrt(3)
+    else:
+        ell2 = ell * ell
+        em2 = em * em
+        return ((-2*c*(2*ell + ell2 + c*em)*ess*
+                np.sqrt(((1 + 2*ell + ell2 - em2)*(1 + 2*ell + ell2 - ess2))/
+                (3 + 8*ell + 4*ell2)))/(ell*(2 + 3*ell + ell2)))
 
 
 def sparse_spectral_matrix(c, ell, em, ess=-2):
     """
-    Is this symmetric?
+    Combine functions to create the sparse matrix to be solved.
+
+    Inputs:
+        c (float): a * omega
+        ell (int): swsh mode number
+        em (int): mode number
+        ess (int) [-2]: spin number
+
+    Returns:
+        band_matrix (sparse<float>): sparse matrix to be solved
     """
     lmin = max(abs(ess), abs(em))
 
@@ -116,25 +170,30 @@ def sparse_spectral_matrix(c, ell, em, ess=-2):
 
 
 def solve_sparse_matrix(c, ell, em, ess=-2):
+    """
+    Solve sparse spectral matrix for eigenvalues and coefficients for Ylm's.
+
+    Inputs:
+        c (float): a * omega
+        ell (int): swsh mode number
+        em (int): mode number
+        ess (int) [-2]: spin number
+
+    Returns:
+        eigen (float): eigenvalue of sparse matrix
+        coeffs ([1 x n] array<float>): array of coefficients for Ylm's
+    """
     matrix = sparse_spectral_matrix(c, ell, em, ess)
     # print(matrix.todense())
     A0 = ell*(ell + 1) - ess*(ess + 1)
     eigenvalues, eigenvectors = eigs(matrix, 1, sigma=A0)
-    # print(eigenvalues)
-    # print(eigenvectors.T)
     xmin = min(np.real(eigenvalues)) - ess * (ess + 1)
     eigen = xmin + c * c - 2 * c * em
     # ind_max = np.argmax(np.abs(np.real(eigenvectors)))
     # print(ind_max)
     if eigenvectors[0] < 0:  # largest value is always [0]
-        # print('mult by -1')
         eigenvectors = eigenvectors * -1
     coeffs = eigenvectors.T[0]
-    # print(coeffs)
-    # coeffs = np.where(abs(eigenvectors.T[0])>1e-16, eigenvectors.T[0], 0)
-    # print(eigenvalues)
-    # print(eigenvectors.T)
-    # print(coeffs)
 
     return eigen, coeffs
 
@@ -142,8 +201,22 @@ def solve_sparse_matrix(c, ell, em, ess=-2):
 # We'll need Ylm and it's first derivative for the Slms
 #-------------------------------------------------------------------------------
 
-
 def sphericalY(theta, phi, ell, em, ess=-2):
+    """
+    Compute spin-weighted spherical harmonic functions
+
+    Inputs:
+        theta (float): polar angle
+        phi (float): azimuthal angle
+        c (float): a * omega
+        ell (int): swsh mode number
+        em (int): mode number
+        ess (int) [-2]: spin number
+
+    Returns:
+        Ylm (float): spin-weighted spherical harmonic
+
+    """
     prefactor = (((-1)**em*np.sqrt(((1 + 2*ell)*factorial(ell - em)*
         factorial(ell + em))/ (factorial(ell - ess)*factorial(ell + ess))))/
         (2.*np.sqrt(np.pi)) * np.exp(1j * em * phi))
@@ -159,6 +232,20 @@ def sphericalY(theta, phi, ell, em, ess=-2):
 
 
 def sphericalY_dtheta(theta, phi, ell, em, ess=-2):
+    """
+    Compute first theta derivative of spin-weighted spherical harmonics evaluated at (theta, phi).
+
+    Inputs:
+        theta (float): polar angle
+        phi (float): azimuthal angle
+        c (float): a * omega
+        ell (int): swsh mode number
+        em (int): mode number
+        ess (int) [-2]: spin number
+
+    Returns:
+        Ylm_dtheta (float): theta derivative of spin-weighted spherical harmonic
+    """
     prefactor = (((-1)**em*np.sqrt(((1 + 2*ell)*factorial(ell - em)*
         factorial(ell + em))/ (factorial(ell - ess)*factorial(ell + ess))))/
         (2.*np.sqrt(np.pi)) * np.exp(1j * em * phi))
@@ -173,31 +260,25 @@ def sphericalY_dtheta(theta, phi, ell, em, ess=-2):
     total = np.sum(binoms * phase * deriv)
     return prefactor * total
 
-
-# def sphericalY_d2theta(theta, phi, ell, em, ess=-2):
-#     """
-#     This function does not currently work. Check deriv.
-#     """
-#     prefactor = (((-1)**em*np.sqrt(((1 + 2*ell)*factorial(ell - em)*
-#         factorial(ell + em))/ (factorial(ell - ess)*factorial(ell + ess))))/
-#         (2.*np.sqrt(np.pi)) * np.exp(1j * em * phi))
-#     start = max(em - ess, 0)
-#     end = min(ell - ess, ell + em)
-#     j = np.arange(start, end + 1)
-#     binoms = comb(ell - ess, j) * comb(ell + ess, j + ess - em)
-#     phase = (-1)**(ell - j - ess)
-#     deriv = ((np.cos(theta/2.)**(-em + ess + 2*j)*
-#             (-2*ell + 2*(ell + em - ess - 2*j + (-1 + ell)*np.cos(theta))*
-#             (ell + em - ess - 2*j + ell*np.cos(theta))*(1/np.sin(theta))**2)*
-#             np.sin(theta/2.)**(2*ell + em - ess - 2*j))/2.)
-#     total = np.sum(binoms * phase * deriv)
-#     return prefactor * total
-
 #-------------------------------------------------------------------------------
-# Define the Slm functions and use the DE to get the second derivative
+# Define the Slm functions and use the ODE to get the second derivative
 #-------------------------------------------------------------------------------
 
 def spectral_Slm(theta, phi, coeffs, c, ell, em, ess=-2):
+    """
+    Compute spin-weighted spheroidal harmonic function at (theta, phi).
+    Inputs:
+        theta (float): polar angle
+        phi (float): azimuthal angle
+        coeffs ([1 x n] array<float>): Ylm coefficients for series expansion
+        c (float): a * omega
+        ell (int): swsh mode number
+        em (int): mode number
+        ess (int) [-2]: spin number
+
+    Returns:
+        Slm (float): spin-weighted spheroidal harmonic
+    """
     lmin = max(abs(ess), abs(em))
     nmax = int(50 + np.ceil(abs((3*c)/2. - c*c/250.)))
     if nmax % 2 == 1:
@@ -211,6 +292,20 @@ def spectral_Slm(theta, phi, coeffs, c, ell, em, ess=-2):
 
 
 def spectral_dSlm(theta, phi, coeffs, c, ell, em, ess=-2):
+    """
+    Compute theta derivative of spin-weighted spheroidal harmonic function at (theta, phi).
+    Inputs:
+        theta (float): polar angle
+        phi (float): azimuthal angle
+        coeffs ([1 x n] array<float>): Ylm coefficients for series expansion
+        c (float): a * omega
+        ell (int): swsh mode number
+        em (int): mode number
+        ess (int) [-2]: spin number
+
+    Returns:
+        Slm_dtheta (float): first theta derivative of spin-weighted spheroidal harmonic
+    """
     lmin = max(abs(ess), abs(em))
     nmax = int(50 + np.ceil(abs((3*c)/2. - c*c/250.)))
     if nmax % 2 == 1:
@@ -223,20 +318,19 @@ def spectral_dSlm(theta, phi, coeffs, c, ell, em, ess=-2):
     return np.sqrt(2*np.pi) * total * np.exp(1j * em * phi)
 
 
-# def spectral_d2Slm(theta, phi, coeffs, c, ell, em, ess=-2):
-#     lmin = max(abs(ess), abs(em))
-#     nmax = int(50 + np.ceil(abs((3*c)/2. - c*c/250.)))
-#     if nmax % 2 == 1:
-#         nmax += 1
-#     nmin = min(ell - lmin, nmax)
-#     total = 0.
-#     for j in range(-nmin, nmax):
-#         d2Ylm = sphericalY_d2theta(theta, 0, ell + j, em, ess)
-#         total += coeffs[j + nmin] * d2Ylm
-#     return np.sqrt(2*np.pi) * total * np.exp(1j * em * phi)
-
-
 def find_d2Slm(x, Slm, dSlm, eigen, c, em, ess=-2):
+    """
+    Compute second theta derivative of Slm using ODE.
+
+    Inputs:
+        x (float): cos(theta)
+        Slm (float): spin-weighted spherical harmonic at (theta, phi)
+        dSlm (float): swsh deriv at (theta, phi)
+        eigen (float): eigenvalue of sparse spectral matrix
+        c (float): a * omega
+        em (int): mode number
+        ess (int) [-2]: spin number
+    """
     Alm = -c**2 + eigen + 2 * c * em
     V = ((c * x)*(c * x) - 2 * c * ess * x + ess + Alm -
          (em + ess * x)*(em + ess * x) / (1 - x*x))
@@ -244,10 +338,26 @@ def find_d2Slm(x, Slm, dSlm, eigen, c, em, ess=-2):
     return d2Slm
 
 
-def fast_spheroidal_harmonics_eq(aa, omega, ell, em, ess=-2):
-    theta = np.pi / 2
-    phi = 0
-    x = 0  # this is the argument of the SWSH (not the inclination)
+def fast_spheroidal_harmonics(theta, phi, aa, omega, ell, em, ess=-2):
+    """
+    Convenient function to compute spin-weighted spheroidal harmonic functions.
+
+    Inputs:
+        theta (float): polar angle
+        phi (float): azimuthal angle
+        aa (float): MBH spin parameter
+        omega (float): gravitational wave frequency
+        ell (int): swsh mode number
+        em (int): mode number
+        ess (int) [-2]: spin number
+
+    Returns:
+        eigen (float): eigenvalue of SWSH ODE
+        Slm (float): SWSH at (theta, phi)
+        dSlm (float): first theta derivative of SWSH at (theta, phi)
+        d2Slm (float): second theta derivative of SWSH at (theta, phi)
+    """
+    x = np.cos(theta)
     c, __, __ = swsh_constants(aa, omega, ell, em, ess)
     # print(aa, omega, ell, em, ess)
     eigen, coeffs = solve_sparse_matrix(c, ell, em)
@@ -255,5 +365,5 @@ def fast_spheroidal_harmonics_eq(aa, omega, ell, em, ess=-2):
     dSlm = spectral_dSlm(theta, phi, coeffs, c, ell, em, ess)
     d2Slm = find_d2Slm(x, Slm, dSlm, eigen, c, em, ess)
     # d2Slm = spectral_d2Slm(theta, phi, coeffs, c, ell, em, ess)
-    return eigen, np.real(Slm), np.real(dSlm), np.real(d2Slm)
+    return eigen, Slm, dSlm, d2Slm
 

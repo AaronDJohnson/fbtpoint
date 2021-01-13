@@ -63,3 +63,4 @@ target/
 data/
 
 *.png
+.vscode

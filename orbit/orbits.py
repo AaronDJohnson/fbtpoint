@@ -120,7 +120,7 @@ class Orbit:
         else:
             self.en = en
 
-        if self.em == 0 and self.en == 0 and self.kay == 0:
+        if em == 0 and en == 0 and kay == 0:
             print('The DC component is not currently supported.')
             print('Mode was not set.')
         else:
@@ -163,11 +163,13 @@ class Orbit:
                                             self.ups_phi, self.gamma, self.omega, self.em, self.Lz, self.En, self.Slm, self.Slmd,
                                             self.Slmdd, self.omega_r, self.r1, self.r2, self.r3, self.r4, self.zp, self.zm)
             if np.isnan(self.e_inf):  # TODO (aaron): investigate why this can be nan
-                print('Some value has underflowed - this needs to be investigated.')
+                print('Some value is NaN - this needs to be investigated.')
                 self.e_inf = 0
+                print('Energy at infinity stored as zero:', self.e_inf)
 
-            if self.double:
+            elif self.double:
                 self.e_inf = 2 * self.e_inf
+                print('Energy at infinity:', self.e_inf)
 
             # put everything in a dict to save later as a json/hdf5
             self.harmonic_key = tuple((self.harmonic['ell'], self.harmonic['em']))

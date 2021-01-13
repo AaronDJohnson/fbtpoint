@@ -4,6 +4,7 @@
 
 #include <complex>
 #include <vector>
+#include <math.h>
 
 using namespace std;
 
@@ -47,10 +48,21 @@ complex<double> R_2F1(vector<complex<double>> hyp_vec, vector<int> nf_vec,
     f = find_fn(n, f_vec, n_vec, nu, lambda, omega, aa, em);
     y0 = hypgeo * pow(1 - x, -n) * f;
 
+    // if (isnan(real(y0)) || isnan(imag(y0))) {
+    //     printf("f = %.17g + i %.17g \n", real(f), imag(f));
+    //     printf("hypgeo = %.17g + i %.17g \n", real(hypgeo), imag(hypgeo));
+    // }
+
     n++;
     hypgeo = find_hypgeo(n, hyp_vec, nf_vec, a, b, c, d);
     f = find_fn(n, f_vec, n_vec, nu, lambda, omega, aa, em);
     y_up = hypgeo * pow(1 - x, -n) * f + y0;
+
+    // if (isnan(real(y_up)) || isnan(imag(y_up))) {
+    //     printf("first n++");
+    //     printf("f = %.17g + i %.17g \n", real(f), imag(f));
+    //     printf("hypgeo = %.17g + i %.17g \n", real(hypgeo), imag(hypgeo));
+    // }
 
     re_err = fabs(real(y_up) - real(y0)) / fabs(real(y0));
     im_err = fabs(imag(y_up) - imag(y0)) / fabs(imag(y0));
@@ -64,13 +76,22 @@ complex<double> R_2F1(vector<complex<double>> hyp_vec, vector<int> nf_vec,
 
         y_up += hypgeo * pow(1 - x, -n) * f;
 
+        // if (isnan(real(y_up)) || isnan(imag(y_up))) {
+        //     printf("loop \n");
+        //     printf("hypgeo = %.17g + i %.17g \n", real(hypgeo), imag(hypgeo));
+        //     printf("n = %i \n", n);
+        // }
+
         re_err = fabs(real(y_up) - real(y0)) / fabs(real(y0));
         im_err = fabs(imag(y_up) - imag(y0)) / fabs(imag(y0));
+        // printf("re_err = %.17g \n", re_err);
+        // printf("im_err = %.17g \n", im_err);
         if (n == 1000) {
             printf("R_2F1_up did not converge \n");
             return 0;
         }
     }
+    // printf("n = %i \n", n);
     // down
 
     complex<double> y_dn;
@@ -79,6 +100,7 @@ complex<double> R_2F1(vector<complex<double>> hyp_vec, vector<int> nf_vec,
     hypgeo = find_hypgeo(n, hyp_vec, nf_vec, a, b, c, d);
     f = find_fn(n, f_vec, n_vec, nu, lambda, omega, aa, em);
     y0 = hypgeo * pow(1 - x, -n) * f;
+
 
     n--;
     hypgeo = find_hypgeo(n, hyp_vec, nf_vec, a, b, c, d);
@@ -103,6 +125,12 @@ complex<double> R_2F1(vector<complex<double>> hyp_vec, vector<int> nf_vec,
         }
     }
     y = y_up + y_dn;
+
+    // if (isnan(real(y)) || isnan(imag(y))) {
+    //     printf("y_up = %.17g + i %.17g \n", real(y_up), imag(y_up));
+    //     printf("y_dn = %.17g + i %.17g \n", real(y_dn), imag(y_dn));
+    // }
+
     complex<double> Rin = prefactor * y;
 
     // printf("Rin = %.17g + i %.17g \n", real(Rin), imag(Rin));

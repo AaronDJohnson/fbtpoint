@@ -4,6 +4,7 @@
 // #include <gsl/gsl_complex.h>
 #include <complex>
 #include <vector>
+#include <cmath>
 
 using namespace std;
 
@@ -268,11 +269,18 @@ complex<double> Binc(vector<complex<double>> &f_vec,
 	// printf("Knu2 = %.17g + %.17gi \n", real(Knu2), imag(Knu2));
 	// printf("A = %.17g + %.17gi \n", real(A), imag(A));
 
-	res = A * ((Knu1 - (i * Knu2 * csc((-i * epsilon + ess + nu) *
+	// complex<double> check;
+	complex<double> eps_c {epsilon, 0};
+	// check = exp(i * epsilon * ((-1. + kappa) * 0.5 + log(epsilon))) * omega;
+	// check = log(eps_c);
+
+	res = A * ((Knu1 - (i * Knu2 * csc((-i * eps_c + ess + nu) *
                 M_PI) *
-                sin((i * epsilon - ess + nu) * M_PI)) /
+                sin((i * eps_c - ess + nu) * M_PI)) /
         exp(i * nu * M_PI)) /
-        (exp(i * epsilon * ((-1. + kappa) * 0.5 + log(epsilon))) * omega));
+        (exp(i * eps_c * ((-1. + kappa) * 0.5 + log(eps_c))) * omega));
+	// printf("check = %.17g + %.17gi \n", real(check), imag(check));
+	// printf("Binc = %.17g + %.17gi \n", real(res), imag(res));
 	return res;
 }
 

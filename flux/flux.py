@@ -41,11 +41,15 @@ def eq_find_z(nu, Bin, eigen, slr, ecc, aa, ups_r, ups_theta, ups_phi, gamma,
         re_nu = np.real(nu)
         im_nu = np.imag(nu)
         Rin, dRdr, dRdr2 = py_find_R(r, re_nu, im_nu, aa, omega, em, eigen)
+        if np.isnan(np.real(Rin)):
+            print('r =', r)
+            print('Rin =', Rin)
+            print('dRdr =', dRdr)
+            print('dRdr2 =', dRdr2)
         J, V_t, V_r, I_plus = eq_source(psi, 1, slr, ecc, aa, omega, em, Lz,
                                         En, Slm, Slmd, Slmdd, Rin, dRdr, dRdr2)
         _, _, _, I_minus = eq_source(psi, -1, slr, ecc, aa, omega, em, Lz,
                                      En, Slm, Slmd, Slmdd, Rin, dRdr, dRdr2)
-
         result = (
             V_t / (J * np.sqrt(V_r)) *
             (I_plus * np.exp(1j * omega * t - 1j * em * phi) +
@@ -68,11 +72,16 @@ def eq_find_z(nu, Bin, eigen, slr, ecc, aa, ups_r, ups_theta, ups_phi, gamma,
         re_nu = np.real(nu)
         im_nu = np.imag(nu)
         Rin, dRdr, dRdr2 = py_find_R(r, re_nu, im_nu, aa, omega, em, eigen)
+        print(Rin)
+        print(dRdr)
+        print(dRdr2)
         J, V_t, V_r, I_plus = eq_source(psi, 1, slr, ecc, aa, omega, em, Lz,
                                         En, Slm, Slmd, Slmdd, Rin, dRdr, dRdr2)
         _, _, _, I_minus = eq_source(psi, -1, slr, ecc, aa, omega, em, Lz,
                                      En, Slm, Slmd, Slmdd, Rin, dRdr, dRdr2)
 
+        print(J)
+        print(np.sqrt(V_r))
         result = (
             V_t / (J * np.sqrt(V_r)) *
             (I_plus * np.exp(1j * omega * t - 1j * em * phi) +
@@ -105,8 +114,8 @@ def eq_find_z(nu, Bin, eigen, slr, ecc, aa, ups_r, ups_theta, ups_phi, gamma,
     re_res, re_err = quad(cheap_re, 0, np.pi)
     im_res, im_err = quad(cheap_im, 0, np.pi)
 
-    print(re_err)
-    print(im_err)
+    print('Error in real part of integral:', re_err)
+    print('Error in imag part of integral:', im_err)
 
     # re_res = romberg(integrand_re, a, b, divmax=20)
     # im_res = romberg(integrand_im, a, b, divmax=20)
