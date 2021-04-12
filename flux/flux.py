@@ -8,6 +8,7 @@ from source.tsource import eq_source
 from teukolsky.homteuk import py_find_R
 
 from scipy.integrate import romberg, quad
+from flux.trapezoidal import trapezoidal_rule
 
 import numpy as np
 
@@ -111,16 +112,19 @@ def eq_find_z(nu, Bin, eigen, slr, ecc, aa, ups_r, ups_theta, ups_phi, gamma,
     # re_res, re_err = quad(integrand_re, a, b)
     # im_res, im_err = quad(integrand_im, a, b)
 
-    re_res, re_err = quad(cheap_re, 0, np.pi)
-    im_res, im_err = quad(cheap_im, 0, np.pi)
+    # re_res, re_err = quad(cheap_re, 0, np.pi)
+    # im_res, im_err = quad(cheap_im, 0, np.pi)
+
+    res, re_err, im_err = trapezoidal_rule(find_psi_integrand, 0, np.pi)
 
     print('Error in real part of integral:', re_err)
     print('Error in imag part of integral:', im_err)
 
     # re_res = romberg(integrand_re, a, b, divmax=20)
     # im_res = romberg(integrand_im, a, b, divmax=20)
+    Z = omega_r / (2 * 1j * omega * Bin) * res
 
-    Z = omega_r / (2 * 1j * omega * Bin) * (re_res + 1j * im_res)
+    # Z = omega_r / (2 * 1j * omega * Bin) * (re_res + 1j * im_res)
     return Z
 
 

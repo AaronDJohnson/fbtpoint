@@ -1,5 +1,5 @@
 import numpy as np
-from swsh.spspec import fast_spheroidal_harmonics
+from .spspec import fast_spheroidal_harmonics
 
 # TODO: add test cases
 

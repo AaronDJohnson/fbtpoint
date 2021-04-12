@@ -404,44 +404,44 @@ double calc_J(double chi, double En, double Lz, double Q, double aa, double slr,
 }
 
 
-double calc_wr(double psi, double ups_r, double En, double Lz,
-			   double Q, double aa, double slr, double ecc, double x) {
-	// note that this has only been checked for psi in [0, pi]
-	double aa2 = aa * aa;
-	double slr2 = slr * slr;
-	double ecc2 = ecc * ecc;
-	double En2 = En * En;
-	double Lz2 = Lz * Lz;
-	double a1 = (1 - ecc2) * (1 - En2);
-    double b1 = 2 * (1 - En2 - (1 - ecc2) / slr);
-    double c1 = (((3 + ecc2)*(1 - En2))/(1 - ecc2) - 4/slr + 
-          		 ((1 - ecc2) * (aa2*(1 - En2) + Lz2 + Q)) / slr2);
+// double calc_wr(double psi, double ups_r, double En, double Lz,
+// 			   double Q, double aa, double slr, double ecc, double x) {
+// 	// note that this has only been checked for psi in [0, pi]
+// 	double aa2 = aa * aa;
+// 	double slr2 = slr * slr;
+// 	double ecc2 = ecc * ecc;
+// 	double En2 = En * En;
+// 	double Lz2 = Lz * Lz;
+// 	double a1 = (1 - ecc2) * (1 - En2);
+//     double b1 = 2 * (1 - En2 - (1 - ecc2) / slr);
+//     double c1 = (((3 + ecc2)*(1 - En2))/(1 - ecc2) - 4/slr + 
+//           		 ((1 - ecc2) * (aa2*(1 - En2) + Lz2 + Q)) / slr2);
 
-	double b12 = b1 * b1
-	if (psi == M_PI) {
-		return M_PI;
-	} else {
-		complex<double> phi {0, asinh(sqrt((a1 - (-1 + ecc)*(b1 + c1 - c1*ecc))/
-       						 (a1 + b1 + c1 - c1*ecc2 + sqrt(b12 - 4*a1*c1)*ecc2)))* tan(psi/2.))};
+// 	double b12 = b1 * b1;
+// 	if (psi == M_PI) {
+// 		return M_PI;
+// 	} else {
+// 		complex<double> phi {0, asinh(sqrt((a1 - (-1 + ecc)*(b1 + c1 - c1*ecc))/
+//        						 (a1 + b1 + c1 - c1*ecc2 + sqrt(b12 - 4*a1*c1)*ecc2)))* tan(psi/2.))};
 
-	 	double m = ((a1 + b1 + c1 - c1*ecc2 + sqrt((b12 - 4*a1*c1)*ecc2))/
-  				    (a1 + b1 + c1 - c1*ecc2 - sqrt((b12 - 4*a1*c1)*ecc2)));
-		double k = sqrt(m)
-		complex<double> ellint_f = ellint_1(k, phi);
-		complex<double> res {0, ((-2*(1 - ecc2) * ellint_f * ups_r * power(cos(psi/2.),2)*
-				sqrt(2 + (2*(a1 - (-1 + ecc)*(b1 + c1 - c1*ecc))*power(tan(psi/2.),2))/
-					(a1 + b1 + c1 - c1*ecc2 - sqrt(b12 - 4*a1*c1)*ecc2)))*
-				sqrt(1 + ((a1 - (-1 + ecc)*(b1 + c1 - c1*ecc))*power(tan(psi/2.),2))/
-					(a1 + b1 + c1 - c1*ecc2 + sqrt((b12 - 4*a1*c1)*ecc2))))/
-			(sqrt((a1 - (-1 + ecc)*(b1 + c1 - c1*ecc))/
-				(a1 + b1 + c1 - c1*ecc2 + sqrt((b12 - 4*a1*c1)*ecc2)))*
-				slr*sqrt(2*a1 + 2*b1 + 2*c1 + c1*ecc2 + 2*(b1 + 2*c1)*ecc*cos(psi) + 
-				c1*ecc2*cos(2*psi))))};
-		double re_res = real(res);
+// 	 	double m = ((a1 + b1 + c1 - c1*ecc2 + sqrt((b12 - 4*a1*c1)*ecc2))/
+//   				    (a1 + b1 + c1 - c1*ecc2 - sqrt((b12 - 4*a1*c1)*ecc2)));
+// 		double k = sqrt(m);
+// 		complex<double> ellint_f = ellint_1(k, phi);
+// 		complex<double> res {0, ((-2*(1 - ecc2) * ellint_f * ups_r * power(cos(psi/2.),2)*
+// 				sqrt(2 + (2*(a1 - (-1 + ecc)*(b1 + c1 - c1*ecc))*power(tan(psi/2.),2))/
+// 					(a1 + b1 + c1 - c1*ecc2 - sqrt(b12 - 4*a1*c1)*ecc2)))*
+// 				sqrt(1 + ((a1 - (-1 + ecc)*(b1 + c1 - c1*ecc))*power(tan(psi/2.),2))/
+// 					(a1 + b1 + c1 - c1*ecc2 + sqrt((b12 - 4*a1*c1)*ecc2))))/
+// 			(sqrt((a1 - (-1 + ecc)*(b1 + c1 - c1*ecc))/
+// 				(a1 + b1 + c1 - c1*ecc2 + sqrt((b12 - 4*a1*c1)*ecc2)))*
+// 				slr*sqrt(2*a1 + 2*b1 + 2*c1 + c1*ecc2 + 2*(b1 + 2*c1)*ecc*cos(psi) + 
+// 				c1*ecc2*cos(2*psi))))};
+// 		double re_res = real(res);
 		
-		return re_res;
-	}
-}
+// 		return re_res;
+// 	}
+// }
 
 
 double calc_dwr_dpsi(double psi, double ups_r, double En, double Lz,
@@ -452,37 +452,37 @@ double calc_dwr_dpsi(double psi, double ups_r, double En, double Lz,
 }
 
 
-double calc_wtheta(double chi, double ups_theta, double zp, double zm,
-				   double En, double Lz, double aa, double slr, double x) {
-    // """
-    // w_theta = ups_theta * lambda as a function of polar angle chi
+// double calc_wtheta(double chi, double ups_theta, double zp, double zm,
+// 				   double En, double Lz, double aa, double slr, double x) {
+//     // """
+//     // w_theta = ups_theta * lambda as a function of polar angle chi
 
-    // Parameters:
-    //     chi (float): polar angle
-    //     ups_theta (float): theta mino frequency
-    //     En (float): energy
-    //     Lz (float): angular momentum
-    //     aa (float): spin
-    //     slr (float): semi-latus rectum
-    //     x (float): inclination
+//     // Parameters:
+//     //     chi (float): polar angle
+//     //     ups_theta (float): theta mino frequency
+//     //     En (float): energy
+//     //     Lz (float): angular momentum
+//     //     aa (float): spin
+//     //     slr (float): semi-latus rectum
+//     //     x (float): inclination
 
-    // Returns:
-    //     w_theta (float)
-    // """
-    double pi = M_PI;
-    if (chi >= 0 && chi <= pi / 2) {
-        return ups_theta * calc_lambda_chi(chi, zp, zm, En, Lz, aa, slr, x);
-	} else if (chi > pi / 2 && chi <= pi) {
-        return pi - ups_theta * calc_lambda_chi(pi - chi, zp, zm, En, Lz, aa, slr, x);
-	} else if (chi > pi && chi <= 3 * pi / 2) {
-        return pi + ups_theta * calc_lambda_chi(chi - pi, zp, zm, En, Lz, aa, slr, x);
-	} else if (chi > 3 * pi / 2 && chi <= 2 * pi) {
-        return 2 * pi - ups_theta * calc_lambda_0(2 * pi - chi, zp, zm, En, Lz, aa, slr, x);
-	} else {
-        // print("Something went wrong in calc_wtheta!")
-        return 0.0;  // this case should not occur, but is required by C++
-	}
-}
+//     // Returns:
+//     //     w_theta (float)
+//     // """
+//     double pi = M_PI;
+//     if (chi >= 0 && chi <= pi / 2) {
+//         return ups_theta * calc_lambda_chi(chi, zp, zm, En, Lz, aa, slr, x);
+// 	} else if (chi > pi / 2 && chi <= pi) {
+//         return pi - ups_theta * calc_lambda_chi(pi - chi, zp, zm, En, Lz, aa, slr, x);
+// 	} else if (chi > pi && chi <= 3 * pi / 2) {
+//         return pi + ups_theta * calc_lambda_chi(chi - pi, zp, zm, En, Lz, aa, slr, x);
+// 	} else if (chi > 3 * pi / 2 && chi <= 2 * pi) {
+//         return 2 * pi - ups_theta * calc_lambda_chi(2 * pi - chi, zp, zm, En, Lz, aa, slr, x);
+// 	} else {
+//         // print("Something went wrong in calc_wtheta!")
+//         return 0.0;  // this case should not occur, but is required by C++
+// 	}
+// }
 
 
 double calc_dwtheta_dchi(double chi, double zp, double zm) {
@@ -499,7 +499,7 @@ double calc_dwtheta_dchi(double chi, double zp, double zm) {
     // """
     double k = sqrt(zm / zp);
     double ellipticK_k = gsl_sf_ellint_Kcomp(k, GSL_PREC_DOUBLE);
-    return M_PI / (2 * ellipticK_k) * (1 / (1 - k * k * power(cos(chi),2)));
+    return M_PI / (2 * ellipticK_k) * (1 / (1 - k * k * pow(cos(chi),2)));
 }
 
 
@@ -562,18 +562,18 @@ void calc_gen_coords_mino(double &t, double &r, double &theta, double &phi,
 }
 
 
-void calc_gen_coords_psi(double &t, double &r, double &theta, double &phi,
-	double psi, double ups_r, double ups_theta, double ups_phi, double gamma,
-    double r1, double r2, double r3, double r4, double zp, double zm, double En,
-	double Lz, double Q, double aa, double slr, double ecc, double x,
-	double qphi0, double qr0, double qz0, double qt0) {
+// void calc_gen_coords_psi(double &t, double &r, double &theta, double &phi,
+// 	double psi, double ups_r, double ups_theta, double ups_phi, double gamma,
+//     double r1, double r2, double r3, double r4, double zp, double zm, double En,
+// 	double Lz, double Q, double aa, double slr, double ecc, double x,
+// 	double qphi0, double qr0, double qz0, double qt0) {
 
-	double wr = calc_wr(psi, ups_r, En, Lz, Q, aa, slr, ecc, x);
-	double mino_t = wr / ups_r;
-	t = calc_t(mino_t, ups_r, ups_theta, gamma, qt0, qr0, qz0, r1, r2, r3, r4, zp, zm, En, Lz, aa);
-	r = calc_r(mino_t, ups_r, qr0, r1, r2, r3, r4);
-	theta = calc_theta(mino_t, ups_theta, qz0, zp, zm, En, aa);
-	phi = calc_phi(mino_t, ups_r, ups_theta, ups_phi, qphi0, qr0, qz0, r1, r2, r3, r4, zp, zm, En, Lz, aa);
-}
+// 	double wr = calc_wr(psi, ups_r, En, Lz, Q, aa, slr, ecc, x);
+// 	double mino_t = wr / ups_r;
+// 	t = calc_t(mino_t, ups_r, ups_theta, gamma, qt0, qr0, qz0, r1, r2, r3, r4, zp, zm, En, Lz, aa);
+// 	r = calc_r(mino_t, ups_r, qr0, r1, r2, r3, r4);
+// 	theta = calc_theta(mino_t, ups_theta, qz0, zp, zm, En, aa);
+// 	phi = calc_phi(mino_t, ups_r, ups_theta, ups_phi, qphi0, qr0, qz0, r1, r2, r3, r4, zp, zm, En, Lz, aa);
+// }
 
 

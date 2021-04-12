@@ -11,7 +11,7 @@ from scipy.special import comb, factorial
 #-------------------------------------------------------------------------------
 # TODO List:
 #
-# * make sure that the spectral matrix is symmetric for every situationr
+# * make sure that the spectral matrix is symmetric for every situation
 # * add test cases and check accuracy with BHPTK
 #
 #-------------------------------------------------------------------------------
@@ -54,20 +54,22 @@ def kHat(c, ell, em, ess=-2):
     Returns:
         kHat (float): diagonal element
     """
-    # print(ell)
-    # print(np.where(ell == 0)[0])
-    if ell == 0 and em == 0:
-        return c ** 2 / 3
-    else:
-        ell2 = ell * ell
-        em2 = em * em
-        ell3 = ell2 * ell
-        ess2 = ess * ess
-        c2 = c * c
+    # TODO (aaron): Make this work for ell = 0, em = 0...
+    # This will be important with ess != -2
 
-        return (-(ell*(1 + ell)) + (2*em*ess2*c)/(ell + ell2) + 
-                ((1 + (2*(ell + ell2 - 3*em2)*(ell + ell2 - 3*ess2))/
-                (ell*(-3 + ell + 8*ell2 + 4*ell3)))*c2)/3.)
+    # print(np.where(ell == 0)[0])
+    # if ell == 0 and em == 0:
+    #     return c ** 2 / 3
+    # else:
+    ell2 = ell * ell
+    em2 = em * em
+    ell3 = ell2 * ell
+    ess2 = ess * ess
+    c2 = c * c
+
+    return (-(ell*(1 + ell)) + (2*em*ess2*c)/(ell + ell2) + 
+            ((1 + (2*(ell + ell2 - 3*em2)*(ell + ell2 - 3*ess2))/
+            (ell*(-3 + ell + 8*ell2 + 4*ell3)))*c2)/3.)
 
 
 def k2(c, ell, em, ess=-2):
@@ -120,15 +122,18 @@ def kTilde2(c, ell, em, ess=-2):
     Returns:
         kTilde2 (float): off diagonal +/- 1 element
     """
+    # TODO (aaron): Make this work for ell = 0, em = 0...
+    # This will be important with ess != -2
+
     ess2 = ess * ess
-    if (ell == 0 and em == 0):
-        return (-2*c*ess*np.sqrt(1 - ess2))/np.sqrt(3)
-    else:
-        ell2 = ell * ell
-        em2 = em * em
-        return ((-2*c*(2*ell + ell2 + c*em)*ess*
-                np.sqrt(((1 + 2*ell + ell2 - em2)*(1 + 2*ell + ell2 - ess2))/
-                (3 + 8*ell + 4*ell2)))/(ell*(2 + 3*ell + ell2)))
+    # if (ell == 0 and em == 0):
+    #     return (-2*c*ess*np.sqrt(1 - ess2))/np.sqrt(3)
+    # else:
+    ell2 = ell * ell
+    em2 = em * em
+    return ((-2*c*(2*ell + ell2 + c*em)*ess*
+            np.sqrt(((1 + 2*ell + ell2 - em2)*(1 + 2*ell + ell2 - ess2))/
+            (3 + 8*ell + 4*ell2)))/(ell*(2 + 3*ell + ell2)))
 
 
 def sparse_spectral_matrix(c, ell, em, ess=-2):
@@ -174,7 +179,7 @@ def solve_sparse_matrix(c, ell, em, ess=-2):
     Solve sparse spectral matrix for eigenvalues and coefficients for Ylm's.
 
     Inputs:
-        c (float): a * omega
+        c (float): aa * omega
         ell (int): swsh mode number
         em (int): mode number
         ess (int) [-2]: spin number

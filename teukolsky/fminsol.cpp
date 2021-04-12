@@ -193,7 +193,7 @@ complex<double> cont_frac_dn(int n0, double kappa, double tau,
 }
 
 
-complex<double> minsol(int nf, vector<complex<double>> &f_vec,
+complex<double> minsol(int nf, vector<complex<double> > &f_vec,
 	vector<int> &n_vec, double kappa, double tau, double lambda, double epsilon,
 	complex<double> nu, double aa, int em, int ess=-2, double tol=1e-15) {
 	// the input vector must have nf = 0 when minsol = 1
@@ -237,7 +237,7 @@ complex<double> minsol(int nf, vector<complex<double>> &f_vec,
 }
 
 
-complex<double> find_fn(int n, vector<complex<double>> &f_vec,
+complex<double> find_fn(int n, vector<complex<double> > &f_vec,
 	vector<int> &n_vec, complex<double> nu, double lambda, double omega,
 	double aa, int em, int ess=-2) {
 	//
